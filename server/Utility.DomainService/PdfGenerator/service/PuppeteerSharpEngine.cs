@@ -35,6 +35,19 @@ namespace Utility.DomainService.PdfGenerator.service
         /// </summary>
         private const int DefaultRenderTimeoutSeconds = 30;
 
+        /// <summary>
+        /// How long the shared browser may sit unused before it is closed, so an idle worker does not
+        /// keep a headless Chromium (about 160 MiB of resident memory) for the next render that may
+        /// be hours away. The next render starts it again, which costs about a second. Config:
+        /// PuppeteerSharp:BrowserIdleSeconds; zero or less keeps the browser open as it used to be.
+        /// </summary>
+        private const int DefaultBrowserIdleSeconds = 60;
+
+        // Renders that hold the browser right now. Counted under _browserLock, so the idle close
+        // below can never shut a browser that a render has just been given.
+        private int _activeRenders;
+        private Timer? _idleTimer;
+
         public PuppeteerSharpEngine(
             ILogger<PuppeteerSharpEngine> logger,
             IConfiguration configuration)
@@ -43,62 +56,32 @@ namespace Utility.DomainService.PdfGenerator.service
             _configuration = configuration;
         }
 
-        /// <summary>
-        /// Gets or creates a shared browser instance for PDF generation.
-        /// Uses lazy initialization with thread-safe access.
-        /// </summary>
-        private async Task<IBrowser> GetBrowserAsync()
-        {
-            if (_browser != null && _browser.IsConnected)
-            {
-                return _browser;
-            }
+        private TimeSpan? GetBrowserIdleTimeout() =>
+            (int.TryParse(_configuration["PuppeteerSharp:BrowserIdleSeconds"], out var seconds) ? seconds : DefaultBrowserIdleSeconds) is var value and > 0
+                ? TimeSpan.FromSeconds(value)
+                : null;
 
+        /// <summary>
+        /// Gets or creates the shared browser and counts the caller as using it until
+        /// <see cref="ReleaseBrowser"/>. Uses lazy initialization with thread-safe access.
+        /// </summary>
+        private async Task<IBrowser> AcquireBrowserAsync()
+        {
             await _browserLock.WaitAsync();
             try
             {
-                if (_browser != null && _browser.IsConnected)
+                _idleTimer?.Change(Timeout.Infinite, Timeout.Infinite);
+                _activeRenders++;
+
+                try
                 {
-                    return _browser;
+                    return await GetBrowserLockedAsync();
                 }
-
-                _logger.LogInformation("PuppeteerSharpEngine: Initializing browser instance");
-
-                // Check for configured executable path or download Chromium
-                var executablePath = _configuration["PuppeteerSharp:ExecutablePath"];
-                
-                if (string.IsNullOrEmpty(executablePath))
+                catch
                 {
-                    _logger.LogInformation("PuppeteerSharpEngine: No executable path configured, downloading Chromium...");
-                    var browserFetcher = new BrowserFetcher();
-                    var installedBrowser = await browserFetcher.DownloadAsync();
-                    executablePath = installedBrowser.GetExecutablePath();
+                    _activeRenders--;
+                    throw;
                 }
-
-                var launchOptions = new LaunchOptions
-                {
-                    Headless = true,
-                    ExecutablePath = executablePath,
-                    Args = new[]
-                    {
-                        "--no-sandbox",
-                        "--disable-setuid-sandbox",
-                        "--disable-dev-shm-usage",
-                        "--disable-gpu",
-                        "--disable-software-rasterizer",
-                        "--font-render-hinting=none",
-                        // Backstop for traffic request interception never sees (WebSockets,
-                        // WebRTC): route it to a proxy that does not exist, loopback included.
-                        "--proxy-server=127.0.0.1:9",
-                        "--proxy-bypass-list=<-loopback>",
-                        "--force-webrtc-ip-handling-policy=disable_non_proxied_udp"
-                    }
-                };
-
-                _browser = await Puppeteer.LaunchAsync(launchOptions);
-                _logger.LogInformation("PuppeteerSharpEngine: Browser initialized successfully");
-
-                return _browser;
             }
             finally
             {
@@ -106,14 +89,117 @@ namespace Utility.DomainService.PdfGenerator.service
             }
         }
 
+        private void ReleaseBrowser()
+        {
+            _browserLock.Wait();
+            try
+            {
+                if (--_activeRenders == 0 && !_disposed && GetBrowserIdleTimeout() is { } idle)
+                {
+                    _idleTimer ??= new Timer(_ => _ = CloseIdleBrowserAsync(), null, Timeout.Infinite, Timeout.Infinite);
+                    _idleTimer.Change(idle, Timeout.InfiniteTimeSpan);
+                }
+            }
+            finally
+            {
+                _browserLock.Release();
+            }
+        }
+
+        private async Task CloseIdleBrowserAsync()
+        {
+            try
+            {
+                await _browserLock.WaitAsync();
+                try
+                {
+                    if (_disposed || _activeRenders > 0 || _browser == null)
+                    {
+                        return;
+                    }
+
+                    _logger.LogInformation("PuppeteerSharpEngine: Closing the idle browser to free its memory");
+                    var browser = _browser;
+                    _browser = null;
+
+                    try
+                    {
+                        await browser.CloseAsync();
+                        await browser.DisposeAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "PuppeteerSharpEngine: The idle browser did not close cleanly");
+                    }
+                }
+                finally
+                {
+                    _browserLock.Release();
+                }
+            }
+            catch (ObjectDisposedException)
+            {
+                // The engine was disposed while the timer fired.
+            }
+        }
+
+        private async Task<IBrowser> GetBrowserLockedAsync()
+        {
+            if (_browser != null && _browser.IsConnected)
+            {
+                return _browser;
+            }
+
+            _logger.LogInformation("PuppeteerSharpEngine: Initializing browser instance");
+
+            // Check for configured executable path or download Chromium
+            var executablePath = _configuration["PuppeteerSharp:ExecutablePath"];
+            
+            if (string.IsNullOrEmpty(executablePath))
+            {
+                _logger.LogInformation("PuppeteerSharpEngine: No executable path configured, downloading Chromium...");
+                var browserFetcher = new BrowserFetcher();
+                var installedBrowser = await browserFetcher.DownloadAsync();
+                executablePath = installedBrowser.GetExecutablePath();
+            }
+
+            var launchOptions = new LaunchOptions
+            {
+                Headless = true,
+                ExecutablePath = executablePath,
+                Args = new[]
+                {
+                    "--no-sandbox",
+                    "--disable-setuid-sandbox",
+                    "--disable-dev-shm-usage",
+                    "--disable-gpu",
+                    "--disable-software-rasterizer",
+                    "--font-render-hinting=none",
+                    // Backstop for traffic request interception never sees (WebSockets,
+                    // WebRTC): route it to a proxy that does not exist, loopback included.
+                    "--proxy-server=127.0.0.1:9",
+                    "--proxy-bypass-list=<-loopback>",
+                    "--force-webrtc-ip-handling-policy=disable_non_proxied_udp"
+                }
+            };
+
+            _browser = await Puppeteer.LaunchAsync(launchOptions);
+            _logger.LogInformation("PuppeteerSharpEngine: Browser initialized successfully");
+
+            return _browser;
+        }
+
         /// <inheritdoc />
         public virtual async Task<Stream?> ConvertHtmlToPdfAsync(string htmlContent, PdfGenerationOptions options)
         {
+            var holdsBrowser = false;
+
             try
             {
                 _logger.LogInformation("PuppeteerSharpEngine: Converting HTML to PDF using headless Chromium");
 
-                var browser = await GetBrowserAsync();
+                var browser = await AcquireBrowserAsync();
+                holdsBrowser = true;
                 await using var page = await browser.NewPageAsync();
 
                 // The HTML comes from callers: a script in it could send the document's data out or
@@ -137,6 +223,13 @@ namespace Utility.DomainService.PdfGenerator.service
             {
                 _logger.LogError(ex, "PuppeteerSharpEngine: Error converting HTML to PDF");
                 return null;
+            }
+            finally
+            {
+                if (holdsBrowser)
+                {
+                    ReleaseBrowser();
+                }
             }
         }
 
@@ -400,6 +493,7 @@ namespace Utility.DomainService.PdfGenerator.service
             }
 
             _disposed = true;
+            _idleTimer?.Dispose();
 
             if (_browser != null)
             {
