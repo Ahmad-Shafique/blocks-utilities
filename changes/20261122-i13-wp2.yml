@@ -1,0 +1,3 @@
+type: changed
+breaking: false
+summary: "The worker holds less memory while idle: the EU DSS validator JVM runs the serial collector with a small starting heap, and the shared headless Chromium closes after PuppeteerSharp:BrowserIdleSeconds (default 60, 0 keeps it open) without a render."
