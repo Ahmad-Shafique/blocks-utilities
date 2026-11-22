@@ -47,7 +47,7 @@ public sealed class DriveController : ControllerBase
     [Authorize]
     [ProducesResponseType(typeof(ApiResponse<StartConnectionResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<StartConnectionResponse>), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ApiResponse<StartConnectionResponse>), StatusCodes.Status503ServiceUnavailable)]
     public async Task<IActionResult> StartConnection([FromBody] StartConnectionRequest request, CancellationToken cancellationToken)
     {
@@ -59,7 +59,7 @@ public sealed class DriveController : ControllerBase
     [HttpGet("connections/me")]
     [Authorize]
     [ProducesResponseType(typeof(ApiResponse<ConnectionStatusResponse>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetConnection(CancellationToken cancellationToken)
     {
         var result = await _connections.GetStatusAsync(cancellationToken);
@@ -70,7 +70,7 @@ public sealed class DriveController : ControllerBase
     [HttpDelete("connections/me")]
     [Authorize]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Disconnect(CancellationToken cancellationToken)
     {
@@ -95,7 +95,7 @@ public sealed class DriveController : ControllerBase
     [HttpGet("sites")]
     [Authorize]
     [ProducesResponseType(typeof(ApiResponse<IReadOnlyList<SiteSummary>>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ApiResponse<IReadOnlyList<SiteSummary>>), StatusCodes.Status429TooManyRequests)]
     [ProducesResponseType(typeof(ApiResponse<IReadOnlyList<SiteSummary>>), StatusCodes.Status502BadGateway)]
     public async Task<IActionResult> ListSites([FromQuery] ListSitesRequest request, CancellationToken cancellationToken)
@@ -112,7 +112,7 @@ public sealed class DriveController : ControllerBase
     [Authorize]
     [ProducesResponseType(typeof(ApiResponse<ItemsPage>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<ItemsPage>), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ApiResponse<ItemsPage>), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ApiResponse<ItemsPage>), StatusCodes.Status429TooManyRequests)]
     [ProducesResponseType(typeof(ApiResponse<ItemsPage>), StatusCodes.Status502BadGateway)]
@@ -127,7 +127,7 @@ public sealed class DriveController : ControllerBase
     [Authorize]
     [ProducesResponseType(typeof(ApiResponse<DriveItemSummary>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ApiResponse<DriveItemSummary>), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ApiResponse<DriveItemSummary>), StatusCodes.Status409Conflict)]
     [ProducesResponseType(typeof(ApiResponse<DriveItemSummary>), StatusCodes.Status429TooManyRequests)]
     public async Task<IActionResult> CreateFolder([FromBody] CreateFolderRequest request, CancellationToken cancellationToken)
@@ -144,7 +144,7 @@ public sealed class DriveController : ControllerBase
     [Authorize]
     [ProducesResponseType(typeof(ApiResponse<ImportFileResponse>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ApiResponse<ImportFileResponse>), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ApiResponse<ImportFileResponse>), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ApiResponse<ImportFileResponse>), StatusCodes.Status413PayloadTooLarge)]
     [ProducesResponseType(typeof(ApiResponse<ImportFileResponse>), StatusCodes.Status502BadGateway)]
@@ -162,7 +162,7 @@ public sealed class DriveController : ControllerBase
     [Authorize]
     [ProducesResponseType(typeof(ApiResponse<UploadFilesResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<UploadFilesResponse>), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ApiResponse<UploadFilesResponse>), StatusCodes.Status429TooManyRequests)]
     public async Task<IActionResult> Upload([FromBody] UploadFilesRequest request, CancellationToken cancellationToken)
     {

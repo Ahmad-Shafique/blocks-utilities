@@ -47,7 +47,7 @@ public sealed class SubscriptionSimulationController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<SubscriptionSimulationStateResponse>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProtectedEndPoint("blocks-utilities::subscription-simulation::read")]
     public async Task<IActionResult> GetState(
         string subscriptionId,
@@ -87,7 +87,7 @@ public sealed class SubscriptionSimulationController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ApiResponse<SubscriptionSimulationActionResponse>), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ApiResponse<SubscriptionSimulationActionResponse>), StatusCodes.Status409Conflict)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProtectedEndPoint("blocks-utilities::subscription-simulation::manage")]
     public async Task<IActionResult> MarkPaymentSucceeded(
         string subscriptionId,
@@ -114,7 +114,7 @@ public sealed class SubscriptionSimulationController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ApiResponse<SubscriptionSimulationActionResponse>), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ApiResponse<SubscriptionSimulationActionResponse>), StatusCodes.Status409Conflict)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProtectedEndPoint("blocks-utilities::subscription-simulation::manage")]
     public async Task<IActionResult> MarkPaymentFailed(
         string subscriptionId,
@@ -144,7 +144,7 @@ public sealed class SubscriptionSimulationController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ApiResponse<SubscriptionSimulationActionResponse>), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ApiResponse<SubscriptionSimulationActionResponse>), StatusCodes.Status409Conflict)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProtectedEndPoint("blocks-utilities::subscription-simulation::manage")]
     public async Task<IActionResult> AdvanceRenewal(
         string subscriptionId,
@@ -174,7 +174,7 @@ public sealed class SubscriptionSimulationController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ApiResponse<SubscriptionSimulationActionResponse>), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ApiResponse<SubscriptionSimulationActionResponse>), StatusCodes.Status409Conflict)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProtectedEndPoint("blocks-utilities::subscription-simulation::manage")]
     public async Task<IActionResult> CloseUsagePeriod(
         string subscriptionId,
@@ -204,7 +204,7 @@ public sealed class SubscriptionSimulationController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<SubscriptionSimulationJobRunResponse>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ApiResponse<SubscriptionSimulationJobRunResponse>), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProtectedEndPoint("blocks-utilities::subscription-simulation::manage")]
     public async Task<IActionResult> RunDueJobs(
         string subscriptionId,
@@ -232,7 +232,7 @@ public sealed class SubscriptionSimulationController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<SubscriptionSimulationStateResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProtectedEndPoint("blocks-utilities::subscription-simulation::read")]
     public async Task<IActionResult> GetOrganizationState(string organizationId, CancellationToken cancellationToken)
     {
@@ -252,7 +252,7 @@ public sealed class SubscriptionSimulationController : ControllerBase
     [HttpPost("organizations/{organizationId}/jobs/run-due")]
     [ProducesResponseType(typeof(ApiResponse<SubscriptionSimulationJobRunResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProtectedEndPoint("blocks-utilities::subscription-simulation::manage")]
     public async Task<IActionResult> RunOrganizationDueJobs(
         string organizationId,
@@ -280,7 +280,7 @@ public sealed class SubscriptionSimulationController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<List<SubscriptionSimulationDataPolicyResponse>>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProtectedEndPoint("blocks-utilities::subscription-simulation::read")]
     public IActionResult GetDataPolicy()
     {
@@ -313,7 +313,7 @@ public sealed class SubscriptionSimulationController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<SubscriptionSimulationDataQueryResponse>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ApiResponse<SubscriptionSimulationDataQueryResponse>), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProtectedEndPoint("blocks-utilities::subscription-simulation::read")]
     public async Task<IActionResult> FindData(
         string subscriptionId,
@@ -344,7 +344,7 @@ public sealed class SubscriptionSimulationController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<SubscriptionSimulationDataMutationResponse>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ApiResponse<SubscriptionSimulationDataMutationResponse>), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProtectedEndPoint("blocks-utilities::subscription-simulation::manage")]
     public async Task<IActionResult> UpdateData(
         string subscriptionId,

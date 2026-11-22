@@ -24,7 +24,7 @@ public sealed class SubscriptionPlansController : ControllerBase
 
     [HttpGet]
     [ProducesResponseType(typeof(ApiResponse<IReadOnlyList<PlanResponse>>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ApiResponse<IReadOnlyList<PlanResponse>>), StatusCodes.Status503ServiceUnavailable)]
     [ProtectedEndPoint("blocks-utilities::subscription-plan::read")]
     public async Task<IActionResult> ListPlans(
@@ -109,7 +109,7 @@ public sealed class SubscriptionPlansController : ControllerBase
     [HttpGet("{planId}")]
     [ProducesResponseType(typeof(ApiResponse<PlanResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<PlanResponse>), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProtectedEndPoint("blocks-utilities::subscription-plan::read")]
     public async Task<IActionResult> GetPlan(
         string planId,
@@ -134,7 +134,7 @@ public sealed class SubscriptionPlansController : ControllerBase
     [HttpGet("{planId}/versions")]
     [ProducesResponseType(typeof(ApiResponse<IReadOnlyList<PlanVersionResponse>>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<IReadOnlyList<PlanVersionResponse>>), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProtectedEndPoint("blocks-utilities::subscription-plan::read")]
     public async Task<IActionResult> ListPlanVersions(
         string planId,
@@ -156,7 +156,7 @@ public sealed class SubscriptionPlansController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<PlanResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<PlanResponse>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiResponse<PlanResponse>), StatusCodes.Status409Conflict)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProtectedEndPoint("blocks-utilities::subscription-plan::manage")]
     public async Task<IActionResult> CreatePlan(
         [FromBody] CreatePlanRequest request,
@@ -181,7 +181,7 @@ public sealed class SubscriptionPlansController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<PlanResponse>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiResponse<PlanResponse>), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ApiResponse<PlanResponse>), StatusCodes.Status409Conflict)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProtectedEndPoint("blocks-utilities::subscription-plan::manage")]
     public async Task<IActionResult> UpdatePlan(
         string planId,
@@ -209,7 +209,7 @@ public sealed class SubscriptionPlansController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<PlanResponse>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiResponse<PlanResponse>), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ApiResponse<PlanResponse>), StatusCodes.Status409Conflict)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProtectedEndPoint("blocks-utilities::subscription-plan::manage")]
     public async Task<IActionResult> UpdatePlanMeterRates(
         string planId,
@@ -233,7 +233,7 @@ public sealed class SubscriptionPlansController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<PlanResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<PlanResponse>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiResponse<PlanResponse>), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProtectedEndPoint("blocks-utilities::subscription-plan::manage")]
     public async Task<IActionResult> CreatePrice(
         [FromBody] CreatePriceRequest? request,
@@ -267,7 +267,7 @@ public sealed class SubscriptionPlansController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<PlanResponse>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiResponse<PlanResponse>), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ApiResponse<PlanResponse>), StatusCodes.Status409Conflict)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProtectedEndPoint("blocks-utilities::subscription-plan::manage")]
     public async Task<IActionResult> UpdatePriceDiscount(
         string priceId,
@@ -289,7 +289,7 @@ public sealed class SubscriptionPlansController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<PlanResponse>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiResponse<PlanResponse>), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ApiResponse<PlanResponse>), StatusCodes.Status409Conflict)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProtectedEndPoint("blocks-utilities::subscription-plan::manage")]
     public async Task<IActionResult> UpdatePriceTax(
         string priceId,
@@ -324,7 +324,7 @@ public sealed class SubscriptionPlansController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<PlanResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<PlanResponse>), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ApiResponse<PlanResponse>), StatusCodes.Status409Conflict)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProtectedEndPoint("blocks-utilities::subscription-plan::manage")]
     public async Task<IActionResult> ArchivePlan(
         string planId,
@@ -359,7 +359,7 @@ public sealed class SubscriptionPlansController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<PlanResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<PlanResponse>), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ApiResponse<PlanResponse>), StatusCodes.Status409Conflict)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProtectedEndPoint("blocks-utilities::subscription-plan::manage")]
     public async Task<IActionResult> ArchivePrice(
         string priceId,
