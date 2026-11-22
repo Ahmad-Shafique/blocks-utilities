@@ -54,7 +54,7 @@ public sealed class PdfIngestionsController : ControllerBase
     [ProducesResponseType(
         typeof(ApiResponse<IngestPdfsBatchResponse>),
         StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(
         typeof(ApiResponse<IngestPdfsBatchResponse>),
         StatusCodes.Status503ServiceUnavailable)]
@@ -90,7 +90,7 @@ public sealed class PdfIngestionsController : ControllerBase
     [ProducesResponseType(
         typeof(ApiResponse<PdfIngestionStatusBatchResponse>),
         StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetStatus(
         [FromBody] GetPdfIngestionStatusRequest request,
         CancellationToken cancellationToken)

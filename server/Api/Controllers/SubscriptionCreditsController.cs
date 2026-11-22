@@ -47,7 +47,7 @@ public sealed class SubscriptionCreditsController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<CreditQuoteResponse>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiResponse<CreditQuoteResponse>), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ApiResponse<CreditQuoteResponse>), StatusCodes.Status409Conflict)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProtectedEndPoint(Permission)]
     public async Task<IActionResult> Preview(
         string subscriptionId,
@@ -78,7 +78,7 @@ public sealed class SubscriptionCreditsController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<CreditPurchaseResponse>), StatusCodes.Status409Conflict)]
     [ProducesResponseType(typeof(ApiResponse<CreditPurchaseResponse>), StatusCodes.Status422UnprocessableEntity)]
     [ProducesResponseType(typeof(ApiResponse<CreditPurchaseResponse>), StatusCodes.Status502BadGateway)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProtectedEndPoint(Permission)]
     public async Task<IActionResult> Purchase(
         string subscriptionId,
@@ -99,7 +99,7 @@ public sealed class SubscriptionCreditsController : ControllerBase
     [HttpGet]
     [ProducesResponseType(typeof(ApiResponse<IReadOnlyList<CreditGrantResponse>>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<IReadOnlyList<CreditGrantResponse>>), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProtectedEndPoint(Permission)]
     public async Task<IActionResult> ListGrants(
         string subscriptionId,
@@ -124,7 +124,7 @@ public sealed class SubscriptionCreditsController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<CreditGrantResponse>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiResponse<CreditGrantResponse>), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ApiResponse<CreditGrantResponse>), StatusCodes.Status409Conflict)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProtectedEndPoint(Permission)]
     public async Task<IActionResult> Grant(
         string subscriptionId,
@@ -148,7 +148,7 @@ public sealed class SubscriptionCreditsController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<CreditMoveResponse>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiResponse<CreditMoveResponse>), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ApiResponse<CreditMoveResponse>), StatusCodes.Status409Conflict)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProtectedEndPoint(Permission)]
     public async Task<IActionResult> Move(
         string subscriptionId,
@@ -164,7 +164,7 @@ public sealed class SubscriptionCreditsController : ControllerBase
     [HttpGet("purchases")]
     [ProducesResponseType(typeof(ApiResponse<IReadOnlyList<CreditPurchaseResponse>>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<IReadOnlyList<CreditPurchaseResponse>>), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProtectedEndPoint(Permission)]
     public async Task<IActionResult> ListPurchases(
         string subscriptionId,

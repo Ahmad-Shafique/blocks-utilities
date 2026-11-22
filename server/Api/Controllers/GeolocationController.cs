@@ -47,7 +47,7 @@ namespace Api.Controllers
         [Authorize]
         [ProducesResponseType(typeof(ApiResponse<IpLookup[]>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<IpLookup[]>), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ApiResponse<IpLookup[]>), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> LocateIp(
             [FromQuery] LocateIpRequest request,
