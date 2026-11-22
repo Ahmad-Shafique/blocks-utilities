@@ -51,4 +51,14 @@ public sealed class ValidatorProcessChannelTests
             "-Dorg.slf4j.simpleLogger.log.org.apache.pdfbox.pdmodel.font=error",
             "PDFBox logs dozens of lines per file about substituted fonts, which say nothing about the validation");
     }
-}
+
+    [Fact]
+    public void The_jvm_runs_the_serial_collector_with_a_small_starting_heap_to_stay_small_while_idle()
+    {
+        var arguments = ValidatorProcessChannel.Arguments(new PdfSignatureValidatorOptions()).ToList();
+
+        arguments.Should().Contain("-XX:+UseSerialGC", "G1 keeps every region it grew into, about 250 MiB more once the trusted lists are loaded");
+        arguments.Should().Contain("-Xms16m");
+        arguments.Should().Contain("-XX:MaxHeapFreeRatio=20");
+        arguments.IndexOf("-XX:+UseSerialGC").Should().BeLessThan(arguments.IndexOf("DssValidator"), "JVM options after the main class go to the program");
+    }}

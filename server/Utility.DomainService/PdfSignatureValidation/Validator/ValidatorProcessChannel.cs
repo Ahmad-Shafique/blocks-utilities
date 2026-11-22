@@ -90,6 +90,16 @@ namespace Utility.DomainService.PdfSignatureValidation.Validator
             List<string> arguments =
             [
                 $"-Xmx{options.HeapMegabytes}m",
+                // Sized for a process that sits resident next to the worker, not for throughput.
+                // The default collector (G1 on a multi-core machine) keeps every region it has
+                // grown into and never hands them back, and the trusted-list load leaves it about
+                // 250 MiB larger than the serial collector ends up. The validator serves one file
+                // at a time, so the serial collector's pauses cost nothing here.
+                "-XX:+UseSerialGC",
+                "-Xms16m",
+                "-XX:MinHeapFreeRatio=10",
+                "-XX:MaxHeapFreeRatio=20",
+                "-XX:-UsePerfData",
                 "-Djava.awt.headless=true",
                 "-Dorg.slf4j.simpleLogger.defaultLogLevel=warn",
                 "-Dorg.slf4j.simpleLogger.log.org.apache.pdfbox.pdmodel.font=error",

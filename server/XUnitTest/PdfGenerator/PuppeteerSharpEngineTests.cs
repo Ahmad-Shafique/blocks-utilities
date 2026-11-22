@@ -185,8 +185,77 @@ namespace XUnitTest.PdfGenerator
             Assert.True(capturedOptions!.Landscape);
         }
 
+        private static (PuppeteerSharpEngine Engine, Mock<IBrowser> Browser) EngineWithBrowserAndIdleSetting(string? idleSeconds)
+        {
+            var browserMock = new Mock<IBrowser>();
+            var pageMock = new Mock<IPage>();
 
+            browserMock.Setup(b => b.IsConnected).Returns(true);
+            browserMock.Setup(b => b.NewPageAsync()).ReturnsAsync(pageMock.Object);
+            pageMock.Setup(p => p.SetContentAsync(It.IsAny<string>(), It.IsAny<NavigationOptions>()))
+                .Returns(Task.CompletedTask);
+            pageMock.Setup(p => p.PdfDataAsync(It.IsAny<PdfOptions>())).ReturnsAsync([1]);
 
+            var settings = new Dictionary<string, string?> { ["PuppeteerSharp:ExecutablePath"] = "fake-path" };
+            if (idleSeconds != null)
+            {
+                settings["PuppeteerSharp:BrowserIdleSeconds"] = idleSeconds;
+            }
 
-    }
+            var configuration = new ConfigurationBuilder().AddInMemoryCollection(settings).Build();
+            var engine = new PuppeteerSharpEngine(new Mock<ILogger<PuppeteerSharpEngine>>().Object, configuration);
+            InjectBrowser(engine, browserMock.Object);
+
+            return (engine, browserMock);
+        }
+
+        [Fact]
+        public async Task TheBrowser_IsClosed_WhenItHasBeenIdleForTheConfiguredTime()
+        {
+            var (engine, browser) = EngineWithBrowserAndIdleSetting("1");
+
+            var result = await engine.ConvertHtmlToPdfAsync("<h1>Hi</h1>", new PdfGenerationOptions());
+
+            Assert.NotNull(result);
+
+            var closed = false;
+            for (var attempt = 0; attempt < 100 && !closed; attempt++)
+            {
+                await Task.Delay(100);
+                closed = browser.Invocations.Any(i => i.Method.Name == nameof(IBrowser.CloseAsync));
+            }
+
+            Assert.True(closed, "an idle browser holds about 160 MiB for nothing");
+        }
+
+        [Fact]
+        public async Task TheBrowser_StaysOpen_WhenTheIdleCloseIsSwitchedOff()
+        {
+            var (engine, browser) = EngineWithBrowserAndIdleSetting("0");
+
+            await engine.ConvertHtmlToPdfAsync("<h1>Hi</h1>", new PdfGenerationOptions());
+            await Task.Delay(1500);
+
+            browser.Verify(b => b.CloseAsync(), Times.Never);
+        }
+
+        [Fact]
+        public async Task TheBrowser_IsNotClosed_WhileARenderStillHoldsIt()
+        {
+            var (engine, browser) = EngineWithBrowserAndIdleSetting("1");
+            var release = new TaskCompletionSource();
+            var pageMock = new Mock<IPage>();
+            pageMock.Setup(p => p.SetContentAsync(It.IsAny<string>(), It.IsAny<NavigationOptions>()))
+                .Returns(release.Task);
+            pageMock.Setup(p => p.PdfDataAsync(It.IsAny<PdfOptions>())).ReturnsAsync([1]);
+            browser.Setup(b => b.NewPageAsync()).ReturnsAsync(pageMock.Object);
+
+            var render = engine.ConvertHtmlToPdfAsync("<h1>Slow</h1>", new PdfGenerationOptions());
+            await Task.Delay(1800);
+
+            browser.Verify(b => b.CloseAsync(), Times.Never);
+
+            release.SetResult();
+            Assert.NotNull(await render);
+        }    }
 }
