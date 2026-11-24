@@ -22,7 +22,7 @@ public sealed class PdfSignatureValidatorSupervisorTests
     [Fact]
     public async Task A_ready_validator_serves_a_file_and_returns_its_parsed_verdict()
     {
-        await using var harness = new Harness(new FakeFactory()).ConfigureAwait(false);
+        await using var harness = new Harness(new FakeFactory());
         await harness.StartAsync();
 
         await WaitUntilAsync(() => harness.Supervisor.IsReady, "the validator to report ready");
@@ -52,7 +52,7 @@ public sealed class PdfSignatureValidatorSupervisorTests
         var loaded = false;
         using var first = new FakeChannel();
         first.Respond = request => Operation(request) == "status" ? Status(request, ready: loaded) : Serve(first, request);
-        await using var harness = new Harness(new FakeFactory(() => first)).ConfigureAwait(false);
+        await using var harness = new Harness(new FakeFactory(() => first));
         await harness.StartAsync();
 
         await WaitUntilAsync(() => first.Ops.Contains("status"), "the first status check");
@@ -72,7 +72,7 @@ public sealed class PdfSignatureValidatorSupervisorTests
     {
         using var first = new FakeChannel();
         first.Respond = request => Operation(request) == "validate" ? null : Serve(first, request);
-        await using var harness = new Harness(new FakeFactory(() => first)).ConfigureAwait(false);
+        await using var harness = new Harness(new FakeFactory(() => first));
         await harness.StartAsync();
         await WaitUntilAsync(() => harness.Supervisor.IsReady, "the validator to report ready");
 
@@ -103,7 +103,7 @@ public sealed class PdfSignatureValidatorSupervisorTests
             first.Crash();
             return null;
         };
-        await using var harness = new Harness(new FakeFactory(() => first)).ConfigureAwait(false);
+        await using var harness = new Harness(new FakeFactory(() => first));
         await harness.StartAsync();
         await WaitUntilAsync(() => harness.Supervisor.IsReady, "the validator to report ready");
 
@@ -120,7 +120,7 @@ public sealed class PdfSignatureValidatorSupervisorTests
         first.Respond = request => Operation(request) == "validate"
             ? VerdictLine("not-the-id-we-sent")
             : Serve(first, request);
-        await using var harness = new Harness(new FakeFactory(() => first)).ConfigureAwait(false);
+        await using var harness = new Harness(new FakeFactory(() => first));
         await harness.StartAsync();
         await WaitUntilAsync(() => harness.Supervisor.IsReady, "the validator to report ready");
 
@@ -138,7 +138,7 @@ public sealed class PdfSignatureValidatorSupervisorTests
         first.Respond = request => Operation(request) == "validate"
             ? ErrorLine(request, "trust_lists_unavailable")
             : Serve(first, request);
-        await using var harness = new Harness(new FakeFactory(() => first)).ConfigureAwait(false);
+        await using var harness = new Harness(new FakeFactory(() => first));
         await harness.StartAsync();
         await WaitUntilAsync(() => harness.Supervisor.IsReady, "the validator to report ready");
 
@@ -156,7 +156,7 @@ public sealed class PdfSignatureValidatorSupervisorTests
         first.Respond = request => Operation(request) == "validate" && Path(request) == "bad.pdf"
             ? ErrorLine(request, "input_not_pdf")
             : Serve(first, request);
-        await using var harness = new Harness(new FakeFactory(() => first)).ConfigureAwait(false);
+        await using var harness = new Harness(new FakeFactory(() => first));
         await harness.StartAsync();
         await WaitUntilAsync(() => harness.Supervisor.IsReady, "the validator to report ready");
 
@@ -174,7 +174,7 @@ public sealed class PdfSignatureValidatorSupervisorTests
     {
         using var first = new FakeChannel();
         first.Respond = request => Operation(request) == "validate" ? null : Serve(first, request);
-        await using var harness = new Harness(new FakeFactory(() => first), options => options.PerFileTimeoutSeconds = 10).ConfigureAwait(false);
+        await using var harness = new Harness(new FakeFactory(() => first), options => options.PerFileTimeoutSeconds = 10);
         await harness.StartAsync();
         await WaitUntilAsync(() => harness.Supervisor.IsReady, "the validator to report ready");
 
@@ -196,7 +196,7 @@ public sealed class PdfSignatureValidatorSupervisorTests
     public async Task A_process_that_never_answers_its_first_status_is_killed_and_replaced()
     {
         using var first = new FakeChannel { Respond = _ => null };
-        await using var harness = new Harness(new FakeFactory(() => first)).ConfigureAwait(false);
+        await using var harness = new Harness(new FakeFactory(() => first));
         await harness.StartAsync();
 
         await WaitUntilAsync(() => harness.Supervisor.IsReady, "the replacement process to become ready");
@@ -208,7 +208,7 @@ public sealed class PdfSignatureValidatorSupervisorTests
     [Fact]
     public async Task A_process_that_cannot_be_started_is_retried()
     {
-        await using var harness = new Harness(new FakeFactory(() => throw new InvalidOperationException("java not found"))).ConfigureAwait(false);
+        await using var harness = new Harness(new FakeFactory(() => throw new InvalidOperationException("java not found")));
         await harness.StartAsync();
 
         await WaitUntilAsync(() => harness.Supervisor.IsReady, "a later attempt to start the process");
@@ -221,7 +221,7 @@ public sealed class PdfSignatureValidatorSupervisorTests
     {
         // A kind of failure nobody listed: an unhandled exception out of a BackgroundService stops
         // the whole host, which would take payments and renewals down with a missing JVM.
-        await using var harness = new Harness(new FakeFactory(() => throw new UnauthorizedAccessException("cache directory is read-only"))).ConfigureAwait(false);
+        await using var harness = new Harness(new FakeFactory(() => throw new UnauthorizedAccessException("cache directory is read-only")));
 
         await harness.StartAsync();
         await WaitUntilAsync(() => harness.Supervisor.IsReady, "a later attempt to start the process");
@@ -235,7 +235,7 @@ public sealed class PdfSignatureValidatorSupervisorTests
     [Fact]
     public async Task Starting_the_host_never_throws_even_when_the_first_start_attempt_throws_straight_away()
     {
-        await using var harness = new Harness(new FakeFactory(() => throw new NotSupportedException("no such platform"))).ConfigureAwait(false);
+        await using var harness = new Harness(new FakeFactory(() => throw new NotSupportedException("no such platform")));
 
         var start = () => harness.StartAsync();
 
@@ -256,7 +256,7 @@ public sealed class PdfSignatureValidatorSupervisorTests
             first.Crash();
             return null;
         };
-        await using var harness = new Harness(new FakeFactory(() => first)).ConfigureAwait(false);
+        await using var harness = new Harness(new FakeFactory(() => first));
         await harness.StartAsync();
         await WaitUntilAsync(() => harness.Supervisor.IsReady, "the validator to report ready");
 
@@ -273,7 +273,7 @@ public sealed class PdfSignatureValidatorSupervisorTests
         var loaded = false;
         using var first = new FakeChannel();
         first.Respond = request => Operation(request) == "status" ? Status(request, ready: loaded) : Serve(first, request);
-        await using var harness = new Harness(new FakeFactory(() => first)).ConfigureAwait(false);
+        await using var harness = new Harness(new FakeFactory(() => first));
         await harness.StartAsync();
         await WaitUntilAsync(() => first.Ops.Contains("status"), "the first status check");
 
@@ -298,7 +298,7 @@ public sealed class PdfSignatureValidatorSupervisorTests
     {
         using var first = new FakeChannel();
         first.Respond = request => Operation(request) == "validate" ? null : Serve(first, request);
-        await using var harness = new Harness(new FakeFactory(() => first)).ConfigureAwait(false);
+        await using var harness = new Harness(new FakeFactory(() => first));
         await harness.StartAsync();
         await WaitUntilAsync(() => harness.Supervisor.IsReady, "the validator to report ready");
 
@@ -324,7 +324,7 @@ public sealed class PdfSignatureValidatorSupervisorTests
             first.Crash();
             return null;
         };
-        await using var harness = new Harness(new FakeFactory(() => first)).ConfigureAwait(false);
+        await using var harness = new Harness(new FakeFactory(() => first));
         await harness.StartAsync();
         await WaitUntilAsync(() => harness.Supervisor.IsReady, "the validator to report ready");
 
@@ -345,7 +345,7 @@ public sealed class PdfSignatureValidatorSupervisorTests
         var loaded = false;
         using var first = new FakeChannel();
         first.Respond = request => Operation(request) == "status" ? Status(request, ready: loaded) : Serve(first, request);
-        await using var harness = new Harness(new FakeFactory(() => first)).ConfigureAwait(false);
+        await using var harness = new Harness(new FakeFactory(() => first));
         await harness.StartAsync();
         await WaitUntilAsync(() => first.Ops.Contains("status"), "the first status check");
 
@@ -371,7 +371,7 @@ public sealed class PdfSignatureValidatorSupervisorTests
         // the death. A JVM killed for memory between files looks exactly like this.
         using var first = new FakeChannel();
         first.Respond = request => Serve(first, request);
-        await using var harness = new Harness(new FakeFactory(() => first)).ConfigureAwait(false);
+        await using var harness = new Harness(new FakeFactory(() => first));
         await harness.StartAsync();
         await WaitUntilAsync(() => harness.Supervisor.IsReady, "the validator to report ready");
 
@@ -389,7 +389,7 @@ public sealed class PdfSignatureValidatorSupervisorTests
     {
         using var first = new FakeChannel();
         first.Respond = request => Operation(request) == "validate" ? null : Serve(first, request);
-        await using var harness = new Harness(new FakeFactory(() => first), options => options.StatusPollSeconds = 1).ConfigureAwait(false);
+        await using var harness = new Harness(new FakeFactory(() => first), options => options.StatusPollSeconds = 1);
         await harness.StartAsync();
         await WaitUntilAsync(() => harness.Supervisor.IsReady, "the validator to report ready");
 
@@ -422,7 +422,7 @@ public sealed class PdfSignatureValidatorSupervisorTests
         {
             options.PerFileTimeoutSeconds = 1;
             options.FirstFileTimeoutSeconds = 3;
-        }).ConfigureAwait(false);
+        });
         await harness.StartAsync();
         await WaitUntilAsync(() => harness.Supervisor.IsReady, "the validator to report ready");
 
@@ -452,7 +452,7 @@ public sealed class PdfSignatureValidatorSupervisorTests
         {
             options.PerFileTimeoutSeconds = 1;
             options.FirstFileTimeoutSeconds = 2;
-        }).ConfigureAwait(false);
+        });
         await harness.StartAsync();
         await WaitUntilAsync(() => harness.Supervisor.IsReady, "the validator to report ready");
 
@@ -475,11 +475,69 @@ public sealed class PdfSignatureValidatorSupervisorTests
     [Fact]
     public async Task Validating_with_nothing_running_is_not_ready()
     {
-        await using var harness = new Harness(new FakeFactory()).ConfigureAwait(false);
+        await using var harness = new Harness(new FakeFactory());
 
         var result = await harness.Supervisor.ValidateAsync("a.pdf", CancellationToken.None);
 
         result.Outcome.Should().Be(PdfSignatureValidatorOutcome.NotReady, "before the supervisor starts there is no process to ask");
+    }
+
+    [Fact]
+    public async Task On_demand_the_process_starts_only_on_the_first_request_and_that_request_is_told_to_wait()
+    {
+        await using var harness = new Harness(new FakeFactory(), options => options.StartOnDemand = true);
+        await harness.StartAsync();
+
+        await Task.Delay(1500);
+        harness.Factory.Started.Should().BeEmpty("nothing has asked for a validation yet, so no JVM is started");
+
+        var first = await harness.Supervisor.ValidateAsync("a.pdf", CancellationToken.None);
+        first.Outcome.Should().Be(PdfSignatureValidatorOutcome.NotReady, "the job waits for the lists to load and is retried");
+
+        await WaitUntilAsync(() => harness.Supervisor.IsReady, "the validator to start and report ready");
+        harness.Factory.Started.Should().ContainSingle();
+        (await harness.Supervisor.ValidateAsync("a.pdf", CancellationToken.None)).Outcome.Should().Be(PdfSignatureValidatorOutcome.Verdict);
+        harness.Logger.Entries.Should().NotContain(entry => entry.Level == LogLevel.Critical, "waiting for a request is not an outage");
+    }
+
+    [Fact]
+    public async Task On_demand_an_idle_process_is_stopped_without_an_error_and_the_next_request_starts_another()
+    {
+        await using var harness = new Harness(new FakeFactory(), options =>
+        {
+            options.StartOnDemand = true;
+            options.IdleStopMinutes = 10;
+        });
+        await harness.StartAsync();
+        await harness.Supervisor.ValidateAsync("a.pdf", CancellationToken.None);
+        await WaitUntilAsync(() => harness.Supervisor.IsReady, "the validator to start and report ready");
+
+        harness.Time.UtcNow = ClockStart.AddMinutes(11);
+        await WaitUntilAsync(() => !harness.Supervisor.IsReady && harness.Factory.Started[0].Killed, "the idle stop");
+
+        await Task.Delay(1500);
+        harness.Factory.Started.Should().ContainSingle("the stopped process is not restarted until a request asks for it");
+        harness.Logger.Entries.Should().NotContain(entry => entry.Level >= LogLevel.Error, "an idle stop is not a failure");
+
+        harness.Time.UtcNow = ClockStart.AddMinutes(40);
+        harness.Logger.Entries.Should().NotContain(entry => entry.Level == LogLevel.Critical, "a deliberate stop is never reported as unavailable");
+        (await harness.Supervisor.ValidateAsync("b.pdf", CancellationToken.None)).Outcome.Should().Be(PdfSignatureValidatorOutcome.NotReady);
+        await WaitUntilAsync(() => harness.Supervisor.IsReady && harness.Factory.Started.Count == 2, "a new process after the request");
+    }
+
+    [Fact]
+    public async Task Without_the_option_an_idle_process_is_never_stopped()
+    {
+        await using var harness = new Harness(new FakeFactory());
+        await harness.StartAsync();
+        await WaitUntilAsync(() => harness.Supervisor.IsReady, "the validator to report ready");
+
+        harness.Time.UtcNow = ClockStart.AddMinutes(30);
+        await Task.Delay(2500);
+
+        harness.Supervisor.IsReady.Should().BeTrue();
+        harness.Factory.Started.Should().ContainSingle();
+        harness.Factory.Started[0].Killed.Should().BeFalse();
     }
 
     private static async Task WaitUntilAsync(Func<bool> condition, string waitingFor)

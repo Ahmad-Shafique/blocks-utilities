@@ -82,5 +82,17 @@ namespace Utility.DomainService.PdfSignatureValidation.Validator
 
         /// <summary>The delay before a job that found the validator not ready is tried again.</summary>
         public int NotReadyRetrySeconds { get; set; } = 15;
+
+        /// <summary>
+        /// When <c>true</c>, the JVM is not started with the worker. It starts on the first validation
+        /// request and stops after <see cref="IdleStopMinutes"/> without one, which frees about 250 to
+        /// 360 MiB on an idle worker. The cost: the first validation after an idle spell waits for the
+        /// trusted lists to load (55 to 145 s); the job is retried until <see cref="TrustedListWaitMinutes"/>.
+        /// Default <c>false</c>: the JVM stays resident, as before (I13-WP8).
+        /// </summary>
+        public bool StartOnDemand { get; set; }
+
+        /// <summary>Only with <see cref="StartOnDemand"/>: minutes without a request before the JVM is stopped.</summary>
+        public int IdleStopMinutes { get; set; } = 10;
     }
 }
