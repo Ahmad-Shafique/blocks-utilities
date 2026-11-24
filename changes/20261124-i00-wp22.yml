@@ -1,0 +1,3 @@
+type: changed
+breaking: false
+summary: Second upstream intake (I00-WP22): upstream main brought in (existing-subscriber price terms, merged-area URLs, billing notifications, KeyValueStores secrets).
