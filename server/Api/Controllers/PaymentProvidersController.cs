@@ -37,7 +37,7 @@ public sealed class PaymentProvidersController : ControllerBase
     [ProducesResponseType(
         typeof(ApiResponse<IReadOnlyList<PaymentProviderResponse>>),
         StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(
         typeof(ApiResponse<object>),
         StatusCodes.Status503ServiceUnavailable)]
@@ -73,7 +73,7 @@ public sealed class PaymentProvidersController : ControllerBase
     [ProducesResponseType(
         typeof(ApiResponse<PaymentProviderResponse>),
         StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(
         typeof(ApiResponse<PaymentProviderResponse>),
         StatusCodes.Status404NotFound)]
@@ -114,7 +114,7 @@ public sealed class PaymentProvidersController : ControllerBase
     [ProducesResponseType(
         typeof(ApiResponse<PaymentProviderResponse>),
         StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(
         typeof(ApiResponse<PaymentProviderResponse>),
         StatusCodes.Status404NotFound)]
@@ -156,7 +156,7 @@ public sealed class PaymentProvidersController : ControllerBase
     [ProducesResponseType(
         typeof(ApiResponse<PaymentEncryptionHealthResponse>),
         StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(
         typeof(ApiResponse<PaymentEncryptionHealthResponse>),
         StatusCodes.Status503ServiceUnavailable)]
@@ -193,7 +193,7 @@ public sealed class PaymentProvidersController : ControllerBase
     [ProducesResponseType(
         typeof(ApiResponse<PaymentEncryptionReEncryptionResponse>),
         StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(
         typeof(ApiResponse<PaymentEncryptionReEncryptionResponse>),
         StatusCodes.Status503ServiceUnavailable)]

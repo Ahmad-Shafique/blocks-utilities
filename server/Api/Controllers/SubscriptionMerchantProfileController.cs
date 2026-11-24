@@ -42,7 +42,7 @@ public sealed class SubscriptionMerchantProfileController : ControllerBase
     [ProducesResponseType(
         typeof(ApiResponse<SubscriptionMerchantProfileResponse>),
         StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProtectedEndPoint("blocks-utilities::subscription-merchant-profile::read")]
     public async Task<IActionResult> Get(CancellationToken cancellationToken)
     {
@@ -62,7 +62,7 @@ public sealed class SubscriptionMerchantProfileController : ControllerBase
     [ProducesResponseType(
         typeof(ApiResponse<SubscriptionMerchantProfileResponse>),
         StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProtectedEndPoint("blocks-utilities::subscription-merchant-profile::manage")]
     public async Task<IActionResult> Update(
         [FromBody] UpdateMerchantProfileRequest request,
