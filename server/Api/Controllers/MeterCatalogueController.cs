@@ -33,7 +33,7 @@ public sealed class MeterCatalogueController : ControllerBase
     /// <summary>The tenant's meters plus the named organization's overrides.</summary>
     [HttpGet]
     [ProducesResponseType(typeof(ApiResponse<IReadOnlyList<MeterCatalogueEntryResponse>>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProtectedEndPoint(ReadPermission)]
     public async Task<IActionResult> List([FromQuery] string? organizationId, CancellationToken cancellationToken)
     {
@@ -45,7 +45,7 @@ public sealed class MeterCatalogueController : ControllerBase
     [HttpGet("{meterKey}")]
     [ProducesResponseType(typeof(ApiResponse<MeterCatalogueEntryResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<MeterCatalogueEntryResponse>), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProtectedEndPoint(ReadPermission)]
     public async Task<IActionResult> Get(string meterKey, [FromQuery] string? organizationId, CancellationToken cancellationToken)
     {
@@ -57,7 +57,7 @@ public sealed class MeterCatalogueController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<MeterCatalogueEntryResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<MeterCatalogueEntryResponse>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiResponse<MeterCatalogueEntryResponse>), StatusCodes.Status409Conflict)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProtectedEndPoint(ManagePermission)]
     public async Task<IActionResult> Create([FromBody] CreateMeterCatalogueEntryRequest request, CancellationToken cancellationToken)
     {
@@ -71,7 +71,7 @@ public sealed class MeterCatalogueController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<MeterCatalogueEntryResponse>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiResponse<MeterCatalogueEntryResponse>), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ApiResponse<MeterCatalogueEntryResponse>), StatusCodes.Status409Conflict)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProtectedEndPoint(ManagePermission)]
     public async Task<IActionResult> Update(
         string meterKey,

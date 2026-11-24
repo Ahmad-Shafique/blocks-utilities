@@ -50,7 +50,7 @@ public sealed class PdfSignatureValidationsController : ControllerBase
     [ProducesResponseType(
         typeof(ApiResponse<ValidatePdfSignaturesBatchResponse>),
         StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(
         typeof(ApiResponse<ValidatePdfSignaturesBatchResponse>),
         StatusCodes.Status503ServiceUnavailable)]
@@ -80,7 +80,7 @@ public sealed class PdfSignatureValidationsController : ControllerBase
     [ProducesResponseType(
         typeof(ApiResponse<PdfSignatureValidationStatusBatchResponse>),
         StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetStatus(
         [FromBody] GetPdfSignatureValidationStatusRequest request,
         CancellationToken cancellationToken)

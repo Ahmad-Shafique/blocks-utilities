@@ -54,7 +54,7 @@ public sealed class DocumentConversionsController : ControllerBase
     [ProducesResponseType(
         typeof(ApiResponse<ConvertDocumentsToPdfBatchResponse>),
         StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(
         typeof(ApiResponse<ConvertDocumentsToPdfBatchResponse>),
         StatusCodes.Status503ServiceUnavailable)]
@@ -101,7 +101,7 @@ public sealed class DocumentConversionsController : ControllerBase
     [ProducesResponseType(
         typeof(ApiResponse<DocumentConversionStatusBatchResponse>),
         StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetStatus(
         [FromBody] GetDocumentConversionStatusRequest request,
         CancellationToken cancellationToken)

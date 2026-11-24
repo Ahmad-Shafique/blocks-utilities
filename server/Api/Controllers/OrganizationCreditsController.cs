@@ -45,7 +45,7 @@ public sealed class OrganizationCreditsController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<CreditQuoteResponse>), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ApiResponse<CreditQuoteResponse>), StatusCodes.Status409Conflict)]
     [ProducesResponseType(typeof(ApiResponse<CreditQuoteResponse>), StatusCodes.Status422UnprocessableEntity)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProtectedEndPoint(Permission)]
     public async Task<IActionResult> Preview(
         [FromBody] OrganizationCreditPurchaseRequest request,
@@ -72,7 +72,7 @@ public sealed class OrganizationCreditsController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<CreditPurchaseResponse>), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ApiResponse<CreditPurchaseResponse>), StatusCodes.Status409Conflict)]
     [ProducesResponseType(typeof(ApiResponse<CreditPurchaseResponse>), StatusCodes.Status422UnprocessableEntity)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProtectedEndPoint(Permission)]
     public async Task<IActionResult> Purchase(
         [FromBody] OrganizationCreditPurchaseRequest request,
@@ -85,7 +85,7 @@ public sealed class OrganizationCreditsController : ControllerBase
     /// <summary>The organization's standalone grants, newest first, with their status as it is now.</summary>
     [HttpGet]
     [ProducesResponseType(typeof(ApiResponse<IReadOnlyList<CreditGrantResponse>>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProtectedEndPoint(Permission)]
     public async Task<IActionResult> ListGrants(
         [FromQuery] string? organizationId,
@@ -103,7 +103,7 @@ public sealed class OrganizationCreditsController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<CreditGrantResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<CreditGrantResponse>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiResponse<CreditGrantResponse>), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProtectedEndPoint(Permission)]
     public async Task<IActionResult> Grant(
         [FromBody] OrganizationGrantCreditsRequest request,
@@ -115,7 +115,7 @@ public sealed class OrganizationCreditsController : ControllerBase
 
     [HttpGet("purchases")]
     [ProducesResponseType(typeof(ApiResponse<IReadOnlyList<CreditPurchaseResponse>>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProtectedEndPoint(Permission)]
     public async Task<IActionResult> ListPurchases(
         [FromQuery] string? organizationId,
@@ -131,7 +131,7 @@ public sealed class OrganizationCreditsController : ControllerBase
     [HttpGet("invoices")]
     [ProducesResponseType(typeof(ApiResponse<SubscriptionFinancialDocumentHistoryResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<SubscriptionFinancialDocumentHistoryResponse>), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProtectedEndPoint(Permission)]
     public async Task<IActionResult> ListInvoices(
         [FromQuery] GetFinancialDocumentsRequest request,

@@ -31,7 +31,7 @@ public sealed class CreditOffersController : ControllerBase
 
     [HttpGet]
     [ProducesResponseType(typeof(ApiResponse<IReadOnlyList<CreditOfferResponse>>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProtectedEndPoint(ReadPermission)]
     public async Task<IActionResult> List(
         [FromQuery] string? organizationId,
@@ -48,7 +48,7 @@ public sealed class CreditOffersController : ControllerBase
     [HttpGet("{meterKey}")]
     [ProducesResponseType(typeof(ApiResponse<CreditOfferResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<CreditOfferResponse>), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProtectedEndPoint(ReadPermission)]
     public async Task<IActionResult> Get(string meterKey, [FromQuery] string? organizationId, CancellationToken cancellationToken)
     {
@@ -61,7 +61,7 @@ public sealed class CreditOffersController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<CreditOfferResponse>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiResponse<CreditOfferResponse>), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ApiResponse<CreditOfferResponse>), StatusCodes.Status409Conflict)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProtectedEndPoint(ManagePermission)]
     public async Task<IActionResult> Create([FromBody] CreditOfferRequest request, CancellationToken cancellationToken)
     {
@@ -75,7 +75,7 @@ public sealed class CreditOffersController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<CreditOfferResponse>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiResponse<CreditOfferResponse>), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ApiResponse<CreditOfferResponse>), StatusCodes.Status409Conflict)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProtectedEndPoint(ManagePermission)]
     public async Task<IActionResult> Update(
         string meterKey,

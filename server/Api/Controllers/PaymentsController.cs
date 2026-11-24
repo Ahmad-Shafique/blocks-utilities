@@ -43,7 +43,7 @@ public sealed class PaymentsController : ControllerBase
     [ProducesResponseType(
         typeof(ApiResponse<PaymentListResponse>),
         StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(
         typeof(ApiResponse<PaymentListResponse>),
         StatusCodes.Status429TooManyRequests)]
@@ -83,7 +83,7 @@ public sealed class PaymentsController : ControllerBase
     [HttpPost("providers")]
     [ProducesResponseType(typeof(ApiResponse<PaymentResponse>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ApiResponse<PaymentResponse>), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ApiResponse<PaymentResponse>), StatusCodes.Status409Conflict)]
     [ProducesResponseType(
         typeof(ApiResponse<PaymentProviderRegistrationResponse>),
