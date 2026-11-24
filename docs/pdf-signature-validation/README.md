@@ -284,6 +284,10 @@ or is killed, for any reason, is logged at Error and counted once, and never sto
 every result is available within 5 minutes of the first request. A single file on an idle worker has
 its result within 1 minute, including a file that runs to the per-file timeout.
 
+## Starting the validator on demand (opt-in)
+
+`PdfSignatureValidation:StartOnDemand` (default `false`) keeps the JVM out of memory until it is needed. When `true`, the worker starts no JVM at boot. The first validation request is answered "not ready" and starts it, and the job is retried every `NotReadyRetrySeconds` until the lists have loaded (up to `TrustedListWaitMinutes`). After `IdleStopMinutes` (default 10) without a request the JVM is stopped again, which is logged at Information and is not an outage. Cost: the first validation after an idle spell waits 55 to 145 s for the trusted lists. Saves about 250 to 360 MiB on an idle worker; set it to `true` on the `one` profile and small self-host installations (environment variable `PdfSignatureValidation__StartOnDemand=true`). With `false`, behaviour is as before.
+
 ## Deferred Decisions
 
 | Decision | Chosen fallback | Revisit trigger |

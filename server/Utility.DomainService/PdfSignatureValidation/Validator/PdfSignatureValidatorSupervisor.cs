@@ -55,6 +55,13 @@ namespace Utility.DomainService.PdfSignatureValidation.Validator
         private long _notReadySinceTicks;
         private volatile bool _unhealthyLogged;
 
+        // StartOnDemand (I13-WP8): the JVM runs only while requests keep coming.
+        private readonly SemaphoreSlim _demand = new(0, 1);
+        private long _lastActivityTicks;
+        private volatile bool _dormant;
+        private volatile bool _stoppedForIdle;
+        private volatile bool _startedOnce;
+
         // Set by whoever first reports the current process's death. A process that dies mid-file is
         // noticed twice, by the restart loop seeing it exit and by the request that was waiting on
         // it; this makes sure it is logged and counted once.
@@ -81,6 +88,7 @@ namespace Utility.DomainService.PdfSignatureValidation.Validator
             _time = time;
 
             _notReadySinceTicks = time.GetUtcNow().UtcDateTime.Ticks;
+            _lastActivityTicks = _notReadySinceTicks;
             metrics.ObserveValidator(() => _ready, () => TrustedListsLoadedAt, time);
         }
 
@@ -108,6 +116,11 @@ namespace Utility.DomainService.PdfSignatureValidation.Validator
             {
                 try
                 {
+                    if (_options.StartOnDemand && !await WaitForDemandAsync(stoppingToken).ConfigureAwait(false))
+                    {
+                        break;
+                    }
+
                     if (await RunProcessAsync(stoppingToken).ConfigureAwait(false))
                     {
                         consecutiveFailures = 0;
@@ -133,6 +146,13 @@ namespace Utility.DomainService.PdfSignatureValidation.Validator
 
                 CheckUnhealthy();
 
+                if (_stoppedForIdle)
+                {
+                    // A deliberate stop, not a failure: no restart delay; the loop waits for demand.
+                    consecutiveFailures = 0;
+                    continue;
+                }
+
                 try
                 {
                     await Task.Delay(RestartDelay(consecutiveFailures), stoppingToken).ConfigureAwait(false);
@@ -143,6 +163,59 @@ namespace Utility.DomainService.PdfSignatureValidation.Validator
                 }
             }
         }
+
+        /// <summary>
+        /// StartOnDemand only: before the very first start and after an idle stop, waits for a validation
+        /// request. A crash does not wait: the process is restarted at once, as without the option.
+        /// False when the host is stopping.
+        /// </summary>
+        private async Task<bool> WaitForDemandAsync(CancellationToken cancellationToken)
+        {
+            if (_startedOnce && !_stoppedForIdle)
+            {
+                return true;
+            }
+
+            if (_stoppedForIdle)
+            {
+                _stoppedForIdle = false;
+
+                while (_demand.Wait(0))
+                {
+                    // Drop a request made while the process was winding down; the job asks again.
+                    // Not done before the very first start: a request made then is real.
+                }
+            }
+
+            _dormant = true;
+
+            try
+            {
+                await _demand.WaitAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                return false;
+            }
+            finally
+            {
+                _dormant = false;
+            }
+
+            var now = _time.GetUtcNow().UtcDateTime.Ticks;
+            Interlocked.Exchange(ref _lastActivityTicks, now);
+            Interlocked.Exchange(ref _notReadySinceTicks, now);
+            _unhealthyLogged = false;
+            _startedOnce = true;
+            _logger.LogInformation("PdfSignatureValidatorSupervisor: A validation was requested; starting the DSS validator on demand");
+            return true;
+        }
+
+        private void Touch() => Interlocked.Exchange(ref _lastActivityTicks, _time.GetUtcNow().UtcDateTime.Ticks);
+
+        private bool IdleExpired() =>
+            _time.GetUtcNow().UtcDateTime - new DateTime(Interlocked.Read(ref _lastActivityTicks), DateTimeKind.Utc)
+                >= TimeSpan.FromMinutes(Math.Max(1, _options.IdleStopMinutes));
 
         /// <summary>
         /// Runs one validator process from start to end. Returns whether it ever became responsive,
@@ -173,6 +246,11 @@ namespace Utility.DomainService.PdfSignatureValidation.Validator
                 {
                     CheckUnhealthy();
 
+                    if (_options.StartOnDemand && IdleExpired() && await TryStopForIdleAsync(cancellationToken).ConfigureAwait(false))
+                    {
+                        break;
+                    }
+
                     if (!await PollStatusAsync(channel, TimeSpan.FromSeconds(_options.PerFileTimeoutSeconds), cancellationToken).ConfigureAwait(false))
                     {
                         break;
@@ -182,7 +260,7 @@ namespace Utility.DomainService.PdfSignatureValidation.Validator
                 // Out of the loop with the process gone. If nobody has reported it, it died on its
                 // own between files - killed for memory, say - which nothing else would have logged.
                 // One this class killed, or that a request saw die, was reported where that happened.
-                if (!cancellationToken.IsCancellationRequested && ClaimDeath())
+                if (!cancellationToken.IsCancellationRequested && !_stoppedForIdle && ClaimDeath())
                 {
                     _logger.LogError("PdfSignatureValidatorSupervisor: The DSS validator process exited on its own; restarting it");
                     _metrics.ValidatorCrashed();
@@ -195,6 +273,34 @@ namespace Utility.DomainService.PdfSignatureValidation.Validator
                 SetReady(false);
                 _channel = null;
                 channel.Kill();
+            }
+        }
+
+        /// <summary>
+        /// Stops the JVM for being idle, unless a validation is running or has just finished: the gate is
+        /// held, so no file is in flight, and activity is checked again under it.
+        /// </summary>
+        private async Task<bool> TryStopForIdleAsync(CancellationToken cancellationToken)
+        {
+            await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
+
+            try
+            {
+                if (!IdleExpired())
+                {
+                    return false;
+                }
+
+                ClaimDeath(); // deliberate: not to be logged or counted as a crash
+                _stoppedForIdle = true;
+                _logger.LogInformation(
+                    "PdfSignatureValidatorSupervisor: No validation for {Minutes} minutes; stopping the DSS validator until the next request",
+                    _options.IdleStopMinutes);
+                return true;
+            }
+            finally
+            {
+                _gate.Release();
             }
         }
 
@@ -302,8 +408,15 @@ namespace Utility.DomainService.PdfSignatureValidation.Validator
 
             // Checked before the gate, not only after it: a process that is still loading holds the
             // gate for its whole startup, and a caller must be told to come back, not made to wait.
+            Touch();
+
             if (!_ready)
             {
+                if (_options.StartOnDemand)
+                {
+                    RequestStart();
+                }
+
                 return PdfSignatureValidatorResult.NotReady();
             }
 
@@ -311,6 +424,7 @@ namespace Utility.DomainService.PdfSignatureValidation.Validator
 
             try
             {
+                Touch();
                 var channel = _channel;
 
                 if (channel is null || !_ready)
@@ -365,6 +479,7 @@ namespace Utility.DomainService.PdfSignatureValidation.Validator
                         return PdfSignatureValidatorResult.Crashed();
 
                     default:
+                        Touch();
                         var result = Interpret(exchange.Reply);
 
                         // Only a verdict counts: a rejection such as "not a PDF" comes back without
@@ -380,6 +495,18 @@ namespace Utility.DomainService.PdfSignatureValidation.Validator
             finally
             {
                 _gate.Release();
+            }
+        }
+
+        private void RequestStart()
+        {
+            try
+            {
+                _demand.Release();
+            }
+            catch (SemaphoreFullException)
+            {
+                // Already asked.
             }
         }
 
@@ -517,6 +644,11 @@ namespace Utility.DomainService.PdfSignatureValidation.Validator
         /// </remarks>
         private void CheckUnhealthy()
         {
+            if (_dormant)
+            {
+                return; // stopped on purpose, waiting for a request
+            }
+
             if (_ready)
             {
                 if (_unhealthyLogged)
@@ -562,6 +694,7 @@ namespace Utility.DomainService.PdfSignatureValidation.Validator
         {
             _channel?.Dispose();
             _gate.Dispose();
+            _demand.Dispose();
             base.Dispose();
         }
 
